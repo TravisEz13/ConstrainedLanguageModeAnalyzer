@@ -1,3 +1,3 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
-[Math]::Exp(2)
+(get-item ./build.ps1).Open("open")
