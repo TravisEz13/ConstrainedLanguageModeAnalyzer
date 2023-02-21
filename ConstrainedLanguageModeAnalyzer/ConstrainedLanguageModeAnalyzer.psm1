@@ -13,19 +13,23 @@ function Get-AllowedTypes {
         [Switch]
         $WithBraces
     )
-    if ($script:allowedTypes) {
-        return $script:allowedTypes
+
+    if (!$script:allowedTypes) {
+        # Cache the allowed types without braces
+        $script:allowedTypes = (get-content -raw "$psscriptroot/allowedTypes.json" | ConvertFrom-Json)
     }
 
-    $script:allowedTypes = (get-content -raw "$psscriptroot/allowedTypes.json" | ConvertFrom-Json) | ForEach-Object {
-        if($WithBraces) {
+
+    if ($WithBraces) {
+        # Add the braces
+        return $script:allowedTypes | ForEach-Object {
             "[$_]"
-        } else {
-            $_
         }
     }
-
-    return $script:allowedTypes
+    else {
+        # Return the types without brackes
+        return $script:allowedTypes
+    }
 }
 
 function Measure-AddType
