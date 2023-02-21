@@ -7,6 +7,27 @@
 ##
 ######################################################################
 
+$script:allowedTypes = $null
+function Get-AllowedTypes {
+    param(
+        [Switch]
+        $WithBraces
+    )
+    if ($script:allowedTypes) {
+        return $script:allowedTypes
+    }
+
+    $script:allowedTypes = (get-content -raw "$psscriptroot/allowedTypes.json" | ConvertFrom-Json) | ForEach-Object {
+        if($WithBraces) {
+            "[$_]"
+        } else {
+            $_
+        }
+    }
+
+    return $script:allowedTypes
+}
+
 function Measure-AddType
 {
     [CmdletBinding()]
@@ -43,6 +64,55 @@ function Measure-AddType
     }
 }
 
+function Measure-NewObject
+{
+    [CmdletBinding()]
+    [OutputType([Microsoft.Windows.Powershell.ScriptAnalyzer.Generic.DiagnosticRecord[]])]
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.Language.ScriptBlockAst]
+        $ScriptBlockAst
+    )
+
+    [ScriptBlock] $predicate = {
+        param ([System.Management.Automation.Language.Ast] $Ast)
+
+        $targetAst = $Ast -as [System.Management.Automation.Language.CommandAst]
+        if($targetAst)
+        {
+            if($targetAst.CommandElements[0].Extent.Text -eq "New-Object")
+            {
+                $newObjectParamaters = [System.Management.Automation.Language.StaticParameterBinder]::BindCommand($targetAst)
+                $typeNameParameter = $newObjectParamaters.BoundParameters.TypeName
+
+                ## If it's not a constant value, check if it's a variable with a constant value
+                if($typeNameParameter.ConstantValue)
+                {
+                    if($newObjectParamaters.BoundParameters.TypeName.Value.Value -in (Get-AllowedTypes))
+                    {
+                        return $false
+                    }
+
+                    return $true
+                } else {
+                    return $true
+                }
+            }
+        }
+    }
+
+    $foundNode = $ScriptBlockAst.Find($predicate, $false)
+    if($foundNode)
+    {
+        [Microsoft.Windows.Powershell.ScriptAnalyzer.Generic.DiagnosticRecord] @{
+            "Message"  = "New-Object is only allowed for specific types."
+            "Extent"   = $foundNode.Extent
+            "RuleName" = "CLM.NewObject"
+            "Severity" = "Warning" }
+    }
+}
 
 <#
 .DESCRIPTION
@@ -71,9 +141,7 @@ function Measure-DangerousMethod
                 return $false
             }
 
-            $allowedTypes = (get-content -raw "$psscriptroot/allowedTypes.json" | ConvertFrom-Json) | ForEach-Object {
-                "[$_]"
-            }
+            $allowedTypes = Get-AllowedTypes -WithBraces
 
             Write-Verbose $targetAst.Expression.Extent.Text -Verbose
             if(($targetAst.Expression.Extent.Text -in $allowedTypes))
