@@ -1,1 +1,1 @@
-pwsh -file doesntexist.ps arg
+pwsh -file doesntexist.ps1 arg
