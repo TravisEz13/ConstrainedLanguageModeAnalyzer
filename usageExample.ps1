@@ -7,6 +7,8 @@ if (!(get-module -ListAvailable PSScriptAnalyzer -ErrorAction Stop)) {
 
 Import-Module PSScriptAnalyzer
 
-Invoke-ScriptAnalyzer -Path "$PSScriptRoot\testFiles\*" `
-    -CustomizedRulePath (Resolve-Path $PSScriptRoot\ConstrainedLanguageModeAnalyzer/ConstrainedLanguageModeAnalyzer.psm1) `
-    -ExcludeRule PS*
+# To analyze files
+Invoke-ClmAnalyzer -Path "$PSScriptRoot\testFiles\*"
+
+# To analyze a script definition
+Invoke-ClmAnalyzer -ScriptDefinition '. test.ps1'
