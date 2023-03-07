@@ -1,4 +1,4 @@
-[cmdletbinding(SupportsShouldProcess = $true)]
+[cmdletbinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
 param(
     [string]
     $Branch = 'main',
@@ -14,15 +14,20 @@ function New-Folder {
 }
 
 function Clean-Item {
+    [cmdletbinding(SupportsShouldProcess = $true)]
     param($Path)
     if (Test-Path -Path $Path) {
-        Remove-Item -Path $Path -Recurse -Force
+        if ($PSCmdlet.ShouldProcess($Path)) {
+            Remove-Item -Path $Path -Recurse -Force
+        }
     }
 }
 
 if (!(get-module -ListAvailable PSScriptAnalyzer -ErrorAction Ignore | Where-Object { $_.version -ge '1.21' } )) {
-    Write-Verbose "installing scriptanalyzer" -Verbose
-    Install-Module -Name PSScriptAnalyzer -Force
+    if ($PSCmdlet.ShouldProcess('Install PSScriptAnalyzer')) {
+        Write-Verbose "installing scriptanalyzer" -Verbose
+        Install-Module -Name PSScriptAnalyzer -Force
+    }
 }
 
 $moduleName = 'ConstrainedLanguageModeAnalyzer'
@@ -41,7 +46,9 @@ try {
     New-Folder -Path $modulePath
     Invoke-WebRequest -Uri $zipUrl -OutFile $tempFile
     Expand-Archive -Path $tempFile -DestinationPath $tempFolder
-    Get-ChildItem "$tempFolder/$moduleName-$Branch/$ModuleName/*" -Recurse | Copy-Item -Destination $modulePath
+    if ($PSCmdlet.ShouldProcess($moduleName,'Install')) {
+        Get-ChildItem "$tempFolder/$moduleName-$Branch/$ModuleName/*" -Recurse | Copy-Item -Destination $modulePath
+    }
     $module = Get-Module -ListAvailable ConstrainedLanguageModeAnalyzer
     if (!$module) {
         throw "There was an issues installing the module"
