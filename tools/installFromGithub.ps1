@@ -46,7 +46,13 @@ $zipUrl = "https://github.com/TravisEz13/$ModuleName/archive/refs/heads/$Branch.
 $tempFile = Join-Path -Path ([System.io.path]::GetTempPath()) -ChildPath "CLM.zip"
 $tempFolder = Join-Path -Path ([System.io.path]::GetTempPath()) -ChildPath "CLM-archive"
 
-$modulePath = Join-Path -Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::LocalApplicationData)) -ChildPath "Powershell/Modules/$ModuleName"
+# $IsWindows is not defined in 5.1, so check if !linux and !macos to check for windows.
+if (!$IsLinux -and !$IsMacOS) {
+    $modulePath = Join-Path -Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::MyDocuments)) -ChildPath "WindowsPowershell/Modules/$ModuleName"
+}
+else {
+    $modulePath = Join-Path -Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::LocalApplicationData)) -ChildPath "Powershell/Modules/$ModuleName"
+}
 
 if ($Clean) {
     Clean-Item -Path $modulePath
