@@ -53,6 +53,7 @@ if (!$IsLinux -and !$IsMacOS) {
 else {
     $modulePath = Join-Path -Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::LocalApplicationData)) -ChildPath "Powershell/Modules/$ModuleName"
 }
+Write-Verbose "ModulePath: $modulePath"
 
 if ($Clean) {
     Clean-Item -Path $modulePath
