@@ -21,7 +21,7 @@ ModuleVersion = '0.0.1'
 GUID = '6f32b16e-66a1-45ca-a3ca-d1cf6b4fa85f'
 
 # Author of this module
-Author = 'Microsoft'
+Author = 'Travis Plunk (Microsoft)'
 
 # Company or vendor of this module
 CompanyName = 'Unknown'
@@ -30,7 +30,7 @@ CompanyName = 'Unknown'
 Copyright = '(c) Microsoft. Licensed under the MIT License..'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'Constrained Language Mode Analyzer'
 
 # Minimum version of the PowerShell engine required by this module
 # PowerShellVersion = ''
@@ -98,6 +98,9 @@ PrivateData = @{
 
     PSData = @{
 
+        ExternalModuleDependencies = @(
+            'PSScriptAnalyzer'
+        )
         # Tags applied to this module. These help with module discovery in online galleries.
         # Tags = @()
 
