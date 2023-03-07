@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 [cmdletbinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
 param(
     [string]
@@ -23,6 +25,15 @@ function Clean-Item {
     }
 }
 
+function Download-File {
+    [cmdletbinding(SupportsShouldProcess = $true)]
+    param($Uri, $Outfile)
+    if ($PSCmdlet.ShouldProcess("$Uri to $Outfile")) {
+        Invoke-WebRequest -Uri $Uri -OutFile $Outfile
+    }
+}
+
+
 if (!(get-module -ListAvailable PSScriptAnalyzer -ErrorAction Ignore | Where-Object { $_.version -ge '1.21' } )) {
     if ($PSCmdlet.ShouldProcess('Install PSScriptAnalyzer')) {
         Write-Verbose "installing scriptanalyzer" -Verbose
@@ -40,13 +51,13 @@ $modulePath = Join-Path -Path ([System.Environment]::GetFolderPath([System.Envir
 if ($Clean) {
     Clean-Item -Path $modulePath
 }
-Clean-Item -Path $tempFolder
+Clean-Item -Path $tempFolder -WhatIf:$false
 
 try {
     New-Folder -Path $modulePath
-    Invoke-WebRequest -Uri $zipUrl -OutFile $tempFile
+    Download-File -Uri $zipUrl -Outfile $tempFile
     Expand-Archive -Path $tempFile -DestinationPath $tempFolder
-    if ($PSCmdlet.ShouldProcess($moduleName,'Install')) {
+    if ($PSCmdlet.ShouldProcess($moduleName, 'Install')) {
         Get-ChildItem "$tempFolder/$moduleName-$Branch/$ModuleName/*" -Recurse | Copy-Item -Destination $modulePath
     }
     $module = Get-Module -ListAvailable ConstrainedLanguageModeAnalyzer
