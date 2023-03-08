@@ -104,12 +104,10 @@ function Invoke-ClmAnalyzer {
         } catch {
             throw
         }
-    }
-
-    clean
-    {
-        if ($null -ne $steppablePipeline) {
-            $steppablePipeline.Clean()
+        finally {
+            if ($null -ne $steppablePipeline) {
+                $steppablePipeline.Clean()
+            }
         }
     }
 }
