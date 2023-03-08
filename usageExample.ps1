@@ -5,7 +5,7 @@ if (!(get-module -ListAvailable PSScriptAnalyzer -ErrorAction Stop)) {
     Install-Module -Name PSScriptAnalyzer -Force
 }
 
-Import-Module PSScriptAnalyzer
+Import-Module .\ConstrainedLanguageModeAnalyzer
 
 # To analyze files
 Invoke-ClmAnalyzer -Path "$PSScriptRoot\testFiles\*"
