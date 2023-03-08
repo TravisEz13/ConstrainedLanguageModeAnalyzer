@@ -48,7 +48,11 @@ $tempFolder = Join-Path -Path ([System.io.path]::GetTempPath()) -ChildPath "CLM-
 
 # $IsWindows is not defined in 5.1, so check if !linux and !macos to check for windows.
 if (!$IsLinux -and !$IsMacOS) {
-    $modulePath = Join-Path -Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::MyDocuments)) -ChildPath "WindowsPowershell/Modules/$ModuleName"
+    $productFolder = 'WindowsPowershell'
+    if ($IsWindows) {
+        $productFolder = 'PowerShell'
+    }
+    $modulePath = Join-Path -Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::MyDocuments)) -ChildPath "$productFolder/Modules/$ModuleName"
 }
 else {
     $modulePath = Join-Path -Path ([System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::LocalApplicationData)) -ChildPath "Powershell/Modules/$ModuleName"
