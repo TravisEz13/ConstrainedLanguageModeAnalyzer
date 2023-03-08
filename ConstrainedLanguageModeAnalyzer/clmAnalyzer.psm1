@@ -105,7 +105,7 @@ function Invoke-ClmAnalyzer {
             throw
         }
         finally {
-            if ($null -ne $steppablePipeline) {
+            if ($null -ne $steppablePipeline -and $steppablePipeline.Clean) {
                 $steppablePipeline.Clean()
             }
         }
